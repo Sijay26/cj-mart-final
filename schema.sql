@@ -1,31 +1,25 @@
--- Create Database
 CREATE DATABASE IF NOT EXISTS cj_mart;
 USE cj_mart;
 
--- Users Table (Simplified: Username/Password only)
-DROP TABLE IF EXISTS users;
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Products Table
-DROP TABLE IF EXISTS products;
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category VARCHAR(50) NOT NULL,
     name VARCHAR(100) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    image VARCHAR(500) NOT NULL,
     description TEXT,
-    rating FLOAT DEFAULT 4.5
+    image VARCHAR(255),
+    rating DECIMAL(2,1) DEFAULT 0.0
 );
 
--- Cart Table
-DROP TABLE IF EXISTS cart;
-CREATE TABLE cart (
+CREATE TABLE IF NOT EXISTS cart (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     product_id INT NOT NULL,
@@ -34,83 +28,83 @@ CREATE TABLE cart (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Orders Table
-DROP TABLE IF EXISTS orders;
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    product_id INT NOT NULL,
-    address TEXT NOT NULL,
-    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(50) DEFAULT 'Pending',
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Insert 50 Specific Products (Real Stock Photos from LoremFlickr)
--- URL Format: https://loremflickr.com/400/400/{keywords}?lock={id}
-
--- 1. DRESSES
+-- Insert Initial Data (Matches fix_database.php)
 INSERT INTO products (category, name, price, description, image, rating) VALUES
-('Dresses', 'Floral Summer Dress', 1299.00, 'Light and breezy.', 'https://loremflickr.com/400/400/dress,floral?lock=1', 4.5),
-('Dresses', 'Party Wear Gown', 2999.00, 'Elegant gown.', 'https://loremflickr.com/400/400/gown,fashion?lock=2', 4.8),
-('Dresses', 'Casual Cotton Dress', 799.00, 'Comfortable cotton.', 'https://loremflickr.com/400/400/dress,casual?lock=3', 4.2),
-('Dresses', 'Ethnic Kurti', 599.00, 'Traditional kurti.', 'https://loremflickr.com/400/400/kurti,ethnic?lock=4', 4.4),
-('Dresses', 'Maxi Dress', 1499.00, 'Long flowing dress.', 'https://loremflickr.com/400/400/dress,maxi?lock=5', 4.6),
-('Dresses', 'Designer Gown', 4999.00, 'Exclusive gown.', 'https://loremflickr.com/400/400/gown,designer?lock=6', 4.9),
-('Dresses', 'Western Short Dress', 999.00, 'Stylish short dress.', 'https://loremflickr.com/400/400/dress,short?lock=7', 4.3),
-('Dresses', 'Printed Daily Wear', 699.00, 'Simple printed dress.', 'https://loremflickr.com/400/400/dress,print?lock=8', 4.1),
-('Dresses', 'Office Wear Dress', 1299.00, 'Formal office dress.', 'https://loremflickr.com/400/400/dress,office?lock=9', 4.5),
-('Dresses', 'Evening Wear Dress', 1899.00, 'Sophisticated evening.', 'https://loremflickr.com/400/400/dress,evening?lock=10', 4.7);
+-- DRESSES
+('Dresses', 'Classic White Shirt', 899.00, 'Formal women\'s button-up shirt.', 'https://cdn.dummyjson.com/product-images/tops/blue-frock/1.webp', 4.5),
+('Dresses', 'Blue Denim Jeans', 1299.00, 'Classic blue denim jeans.', 'https://cdn.dummyjson.com/product-images/tops/girl-summer-dress/1.webp', 4.6),
+('Dresses', 'Traditional Kurti', 1499.00, 'Elegant ethnic wear kurti.', 'https://cdn.dummyjson.com/product-images/tops/gray-dress/1.webp', 4.7),
+('Dresses', 'Salwar Kameez Set', 1899.00, 'Complete chudidhar set.', 'https://cdn.dummyjson.com/product-images/tops/short-frock/1.webp', 4.8),
+('Dresses', 'Silk Saree', 2999.00, 'Traditional Indian silk saree.', 'https://cdn.dummyjson.com/product-images/tops/tartan-dress/1.webp', 4.9),
+('Dresses', 'Casual T-Shirt', 499.00, 'Comfortable daily wear.', 'https://cdn.dummyjson.com/product-images/womens-dresses/black-women\'s-gown/1.webp', 4.3),
+('Dresses', 'Denim Shorts', 699.00, 'Stylish summer shorts.', 'https://cdn.dummyjson.com/product-images/womens-dresses/corset-leather-with-skirt/1.webp', 4.4),
+('Dresses', 'Black Velvet Dress', 1599.00, 'Evening elegance.', 'https://cdn.dummyjson.com/product-images/womens-dresses/corset-with-black-skirt/1.webp', 4.8),
+('Dresses', 'Leather Skirt', 1999.00, 'Chic black leather skirt.', 'https://cdn.dummyjson.com/product-images/womens-dresses/dress-pea/1.webp', 4.5),
+('Dresses', 'Designer Summer Dress', 4999.00, 'Exclusive summer design.', 'https://cdn.dummyjson.com/product-images/womens-dresses/marni-red-&-black-suit/1.webp', 4.9),
 
--- 2. MOBILES
-INSERT INTO products (category, name, price, description, image, rating) VALUES
-('Mobiles', 'Android 5G Phone', 15999.00, 'High speed 5G.', 'https://loremflickr.com/400/400/smartphone,android?lock=11', 4.6),
-('Mobiles', 'Flagship Smartphone', 45999.00, 'Top specs.', 'https://loremflickr.com/400/400/smartphone,tech?lock=12', 4.9),
-('Mobiles', 'Camera Focus Mobile', 22999.00, 'Best camera.', 'https://loremflickr.com/400/400/camera,phone?lock=13', 4.7),
-('Mobiles', 'Gaming Smartphone', 35999.00, 'For gaming.', 'https://loremflickr.com/400/400/gaming,phone?lock=14', 4.8),
-('Mobiles', 'Budget Android Phone', 7999.00, 'Affordable.', 'https://loremflickr.com/400/400/mobile,phone?lock=15', 4.2),
-('Mobiles', 'Premium Glass Phone', 29999.00, 'Glass design.', 'https://loremflickr.com/400/400/smartphone,glass?lock=16', 4.5),
-('Mobiles', 'Dual Camera Phone', 12999.00, 'Dual cameras.', 'https://loremflickr.com/400/400/phone,camera?lock=17', 4.3),
-('Mobiles', 'Battery Long-life Phone', 10999.00, '6000mAh battery.', 'https://loremflickr.com/400/400/battery,phone?lock=18', 4.4),
-('Mobiles', 'Compact Smartphone', 18999.00, 'Small size.', 'https://loremflickr.com/400/400/small,phone?lock=19', 4.5),
-('Mobiles', 'AI Feature Phone', 25999.00, 'AI powered.', 'https://loremflickr.com/400/400/ai,technology?lock=20', 4.6);
+-- TOYS
+('Toys', 'Teddy Bear', 899.00, 'Soft cuddly teddy bear.', 'https://cdn.dummyjson.com/product-images/laptops/macbook-pro/1.webp', 4.7),
+('Toys', 'Robot Toy', 599.00, 'Futuristic robot toy.', 'https://cdn.dummyjson.com/product-images/laptops/samsung-galaxy-book/1.webp', 4.9),
+('Toys', 'Toy Car', 1299.00, 'Classic model car.', 'https://cdn.dummyjson.com/product-images/laptops/microsoft-surface-laptop-4/1.webp', 4.5),
+('Toys', 'Building Blocks', 499.00, 'Creative construction set.', 'https://cdn.dummyjson.com/product-images/laptops/infinix-inbook/1.webp', 4.6),
+('Toys', 'Miniature Car', 299.00, 'Detailed miniature.', 'https://cdn.dummyjson.com/product-images/laptops/hp-pavilion-15-dk1056wm/1.webp', 4.3),
+('Toys', 'Plush Toy', 999.00, 'Soft plush animal.', 'https://cdn.dummyjson.com/product-images/fragrances/perfume-oil/1.webp', 4.4),
+('Toys', 'Action Figure', 399.00, 'Hero figure.', 'https://cdn.dummyjson.com/product-images/fragrances/brown-perfume/1.webp', 4.5),
+('Toys', 'Kids Kitchen Set', 1599.00, 'Kitchen play set.', 'https://cdn.dummyjson.com/product-images/fragrances/fog-scent-xpressio/1.webp', 4.8),
+('Toys', 'Giraffe Toy', 799.00, 'Cute wooden giraffe.', 'https://cdn.dummyjson.com/product-images/fragrances/non-alcoholic-concentrated-perfume-oil/1.webp', 4.7),
+('Toys', 'Wooden Train', 450.00, 'Classic wooden train.', 'https://cdn.dummyjson.com/product-images/fragrances/eau-de-perfume-spray/1.webp', 4.2),
 
--- 3. TOYS
-INSERT INTO products (category, name, price, description, image, rating) VALUES
-('Toys', 'Remote Control Car', 899.00, 'RC car.', 'https://loremflickr.com/400/400/toy,car?lock=21', 4.7),
-('Toys', 'Teddy Bear', 599.00, 'Soft teddy.', 'https://loremflickr.com/400/400/teddy,bear?lock=22', 4.9),
-('Toys', 'Doll Set', 1299.00, 'Doll + accessories.', 'https://loremflickr.com/400/400/doll,toy?lock=23', 4.5),
-('Toys', 'Building Blocks', 499.00, 'Construction set.', 'https://loremflickr.com/400/400/lego,blocks?lock=24', 4.6),
-('Toys', 'Puzzle Toy', 299.00, 'Brain teaser.', 'https://loremflickr.com/400/400/puzzle,game?lock=25', 4.3),
-('Toys', 'Robot Toy', 999.00, 'Walking robot.', 'https://loremflickr.com/400/400/robot,toy?lock=26', 4.4),
-('Toys', 'Action Figure', 399.00, 'Hero figure.', 'https://loremflickr.com/400/400/action,figure?lock=27', 4.5),
-('Toys', 'Kids Kitchen Set', 1599.00, 'Kitchen play.', 'https://loremflickr.com/400/400/toy,kitchen?lock=28', 4.8),
-('Toys', 'Learning Toy', 799.00, 'Educational.', 'https://loremflickr.com/400/400/educational,toy?lock=29', 4.7),
-('Toys', 'Musical Toy', 450.00, 'Plays music.', 'https://loremflickr.com/400/400/toy,music?lock=30', 4.2);
+-- SKINCARE
+('Skincare', 'Attitude Hand Soap', 150.00, 'Natural nourishing soap.', 'https://cdn.dummyjson.com/product-images/skin-care/attitude-super-leaves-hand-soap/1.webp', 4.5),
+('Skincare', 'Olay Body Wash', 299.00, 'Moisturizing body wash.', 'https://cdn.dummyjson.com/product-images/skin-care/olay-ultra-moisture-shea-butter-body-wash/1.webp', 4.6),
+('Skincare', 'Vaseline Lotion', 450.00, 'Deep moisture lotion.', 'https://cdn.dummyjson.com/product-images/skin-care/vaseline-men-body-and-face-lotion/1.webp', 4.8),
+('Skincare', 'Luxury Serum', 599.00, 'Vitamin C serum.', 'https://cdn.dummyjson.com/product-images/skin-care/tree-oil-30ml/1.webp', 4.9),
+('Skincare', 'Night Cream', 699.00, 'Rejuvenating night cream.', 'https://cdn.dummyjson.com/product-images/skin-care/rorec-white-rice-serum/1.webp', 4.7),
+('Skincare', 'Hydrating Mask', 99.00, 'Aloe vera sheet mask.', 'https://cdn.dummyjson.com/product-images/skin-care/hyaluronic-acid-serum/1.webp', 4.4),
+('Skincare', 'Body Lotion', 350.00, 'Cocoa butter lotion.', 'https://cdn.dummyjson.com/product-images/skin-care/oil-free-moisturizer-100ml/1.webp', 4.5),
+('Skincare', 'Toner', 250.00, 'Rose water toner.', 'https://cdn.dummyjson.com/product-images/skin-care/serum-1/1.webp', 4.3),
+('Skincare', 'Cleanser', 199.00, 'Foaming face wash.', 'https://cdn.dummyjson.com/product-images/skin-care/freckle-treatment-cream-15gm/1.webp', 4.4),
+('Skincare', 'Herbal Cream', 120.00, 'Ayurvedic skin cream.', 'https://cdn.dummyjson.com/product-images/skin-care/daalish-anti-aging-eye-serum/1.webp', 4.2),
 
--- 4. GROCERY
-INSERT INTO products (category, name, price, description, image, rating) VALUES
-('Grocery', 'Rice Bag', 499.00, '5kg Rice.', 'https://loremflickr.com/400/400/rice,grain?lock=31', 4.8),
-('Grocery', 'Cooking Oil', 180.00, '1L Oil.', 'https://loremflickr.com/400/400/oil,bottle?lock=32', 4.5),
-('Grocery', 'Snack Packets', 50.00, 'Chips.', 'https://loremflickr.com/400/400/chips,snack?lock=33', 4.3),
-('Grocery', 'Fresh Vegetables', 150.00, 'Vegetables.', 'https://loremflickr.com/400/400/vegetables,fresh?lock=34', 4.7),
-('Grocery', 'Fresh Fruits', 250.00, 'Fruits.', 'https://loremflickr.com/400/400/fruit,basket?lock=35', 4.9),
-('Grocery', 'Milk Pack', 60.00, '1L Milk.', 'https://loremflickr.com/400/400/milk,bottle?lock=36', 4.6),
-('Grocery', 'Spice Masala', 80.00, 'Spices.', 'https://loremflickr.com/400/400/spices,indian?lock=37', 4.5),
-('Grocery', 'Instant Noodles', 20.00, 'Noodles.', 'https://loremflickr.com/400/400/noodles,food?lock=38', 4.4),
-('Grocery', 'Breakfast Cereals', 350.00, 'Cereals.', 'https://loremflickr.com/400/400/cereal,breakfast?lock=39', 4.6),
-('Grocery', 'Household Items', 199.00, 'Cleaning.', 'https://loremflickr.com/400/400/cleaning,products?lock=40', 4.2);
+-- MOBILES
+('Mobiles', 'iPhone 15', 79900.00, 'Latest Apple iPhone 15.', 'https://cdn.dummyjson.com/product-images/smartphones/iphone-x/1.webp', 4.8),
+('Mobiles', 'Samsung Galaxy S24 Ultra', 129999.00, 'Premium Android flagship.', 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-book/1.webp', 4.8),
+('Mobiles', 'POCO X6 Pro', 26999.00, 'High performance mid-ranger.', 'https://cdn.dummyjson.com/product-images/smartphones/oppo-f19/1.webp', 4.5),
+('Mobiles', 'OPPO Reno 11 Pro', 39999.00, 'Stylish portrait expert.', 'https://cdn.dummyjson.com/product-images/smartphones/huawei-p30/1.webp', 4.6),
+('Mobiles', 'Realme 12 Pro Plus', 29999.00, 'Luxury watch design.', 'https://cdn.dummyjson.com/product-images/smartphones/realme-c35/1.webp', 4.7),
+('Mobiles', 'Redmi Note 13 Pro Plus', 31999.00, '200MP camera beast.', 'https://cdn.dummyjson.com/product-images/smartphones/iphone-12-pro/1.webp', 4.6),
+('Mobiles', 'Vivo X100', 63999.00, 'Zeiss optics photography.', 'https://cdn.dummyjson.com/product-images/smartphones/realme-xt/1.webp', 4.8),
+('Mobiles', 'iQOO 12', 52999.00, 'Ultimate gaming phone.', 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s10/1.webp', 4.7),
+('Mobiles', 'Realme X', 16999.00, 'Impressive display.', 'https://cdn.dummyjson.com/product-images/smartphones/realme-x/1.webp', 4.5),
+('Mobiles', 'Samsung Galaxy S8', 25999.00, 'Premium Infinity Display.', 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s8/1.webp', 4.6),
 
--- 5. SKINCARE
-INSERT INTO products (category, name, price, description, image, rating) VALUES
-('Skincare', 'Face Wash', 150.00, 'Face wash.', 'https://loremflickr.com/400/400/face,wash?lock=41', 4.5),
-('Skincare', 'Moisturizer', 299.00, 'Cream.', 'https://loremflickr.com/400/400/cream,lotion?lock=42', 4.6),
-('Skincare', 'Sunscreen', 450.00, 'SPF 50.', 'https://loremflickr.com/400/400/sunscreen,bottle?lock=43', 4.8),
-('Skincare', 'Vitamin C Serum', 599.00, 'Serum.', 'https://loremflickr.com/400/400/serum,bottle?lock=44', 4.9),
-('Skincare', 'Night Cream', 699.00, 'Night repair.', 'https://loremflickr.com/400/400/cream,night?lock=45', 4.7),
-('Skincare', 'Face Mask', 99.00, 'Mask.', 'https://loremflickr.com/400/400/facemask,beauty?lock=46', 4.4),
-('Skincare', 'Body Lotion', 350.00, 'Lotion.', 'https://loremflickr.com/400/400/lotion,body?lock=47', 4.5),
-('Skincare', 'Toner', 250.00, 'Toner.', 'https://loremflickr.com/400/400/toner,skin?lock=48', 4.3),
-('Skincare', 'Cleanser', 199.00, 'Cleanser.', 'https://loremflickr.com/400/400/cleanser,face?lock=49', 4.4),
-('Skincare', 'Herbal Cream', 120.00, 'Herbal.', 'https://loremflickr.com/400/400/herbal,cream?lock=50', 4.2);
+-- GROCERY
+('Grocery', 'Fresh Apple', 499.00, 'Crisp red apple.', 'https://cdn.dummyjson.com/product-images/groceries/apple/1.webp', 4.8),
+('Grocery', 'Banana Bunch', 250.00, 'Fresh yellow bananas.', 'https://cdn.dummyjson.com/product-images/groceries/banana/1.webp', 4.5),
+('Grocery', 'Whole Milk', 320.00, 'Organic whole milk.', 'https://cdn.dummyjson.com/product-images/groceries/milk/1.webp', 4.6),
+('Grocery', 'Brown Eggs', 420.00, 'Farm fresh brown eggs.', 'https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp', 4.7),
+('Grocery', 'Cheddar Cheese', 650.00, 'Aged cheddar cheese.', 'https://cdn.dummyjson.com/product-images/groceries/cheese/1.webp', 4.8),
+('Grocery', 'Whole Wheat Bread', 300.00, 'Healthy wheat bread.', 'https://cdn.dummyjson.com/product-images/groceries/bread/1.webp', 4.4),
+('Grocery', 'Basmati Rice', 1200.00, 'Premium basmati rice.', 'https://cdn.dummyjson.com/product-images/groceries/rice/1.webp', 4.9),
+('Grocery', 'Orange Juice', 399.00, 'Freshly squeezed juice.', 'https://cdn.dummyjson.com/product-images/groceries/juice/1.webp', 4.5),
+('Grocery', 'Ground Coffee', 799.00, 'Aromatic ground coffee.', 'https://cdn.dummyjson.com/product-images/groceries/coffee/1.webp', 4.7),
+('Grocery', 'Green Tea', 550.00, 'Antioxidant green tea.', 'https://cdn.dummyjson.com/product-images/groceries/tea/1.webp', 4.6);

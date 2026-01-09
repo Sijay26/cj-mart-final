@@ -1,4 +1,10 @@
-<?php require 'header.php'; ?>
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+require 'header.php'; ?>
 
 <div class="hero">
     <h1>Smart Shopping, Colorful Living</h1>
